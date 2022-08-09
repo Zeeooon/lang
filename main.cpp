@@ -2,7 +2,6 @@
 #include <string>
 #include <fstream>
 #include <unordered_map>
-#include <map>
 
 std::unordered_map<std::string, std::string> vmap;
 std::unordered_map<std::string, double> nmap;
@@ -14,13 +13,15 @@ void var(std::string line);
 void num(std::string line);
 void out(std::string line);
 void in(std::string line);
-void iff(std::string line);
 void add(std::string line);
 void sub(std::string line);
 void mul(std::string line);
 void div(std::string line);
 void loop(std::string line);
-void cvar(std::string line);
+void iff(std::string line);
+void not(std::string line);
+void gre(std::string line);
+void les(std::string line);
 
 int main(int argc, char* argv[])
 {
@@ -117,19 +118,62 @@ void iff(std::string line)
 {
     std::string cmd = line.substr(line.find_first_of(' ') + 1, line.size());
     line.erase(line.find_first_of(' '), line.size());
-    std::string op2 = line.substr(line.find_first_of('|') + 1, line.size());
-    line.erase(line.find_first_of('|'), line.size());
-    int loc = maploc.find(line)->second;
-    std::string op1;
-    if (loc == 0)
+    int map = maploc.find(line.substr(0, line.find_first_of('|')))->second;
+    if (map == 0)
     {
-        op1 = vmap.find(line)->second;
+        std::string op1, op2;
+        op1 = vmap.find(line.substr(0, line.find_first_of('|')))->second;
+        op2 = line.substr(line.find_first_of('|') + 1, line.size());
+        if (op1 == op2)
+            run(cmd);
     }
     else
     {
-        op1 = std::to_string(nmap.find(line)->second);
+        double op1, op2;
+        op1 = nmap.find(line.substr(0, line.find_first_of('|')))->second;
+        op2 = std::stod(line.substr(line.find_first_of('|') + 1, line.size()));
+        if (op1 == op2)
+            run(cmd);
     }
-    if (op1 == op2)
+}
+void not(std::string line)
+{
+    std::string cmd = line.substr(line.find_first_of(' ') + 1, line.size());
+    line.erase(line.find_first_of(' '), line.size());
+    int map = maploc.find(line.substr(0, line.find_first_of('|')))->second;
+    if (map == 0)
+    {
+        std::string op1, op2;
+        op1 = vmap.find(line.substr(0, line.find_first_of('|')))->second;
+        op2 = line.substr(line.find_first_of('|') + 1, line.size());
+        if (op1 != op2)
+            run(cmd);
+    }
+    else
+    {
+        double op1, op2;
+        op1 = nmap.find(line.substr(0, line.find_first_of('|')))->second;
+        op2 = std::stod(line.substr(line.find_first_of('|') + 1, line.size()));
+        if (op1 != op2)
+            run(cmd);
+    }
+}
+void gre(std::string line)
+{
+    double op1, op2;
+    std::string cmd = line.substr(line.find_first_of(' ') + 1, line.size());
+    op1 = nmap.find(line.substr(0, line.find_first_of('|')))->second;
+    op2 = std::stod(line.substr(line.find_first_of('|') + 1, line.size()));
+    if (op1 > op2)
+        run(cmd);
+}
+void les(std::string line)
+{
+    double op1, op2;
+    std::string cmd = line.substr(line.find_first_of(' ') + 1, line.size());
+    op1 = nmap.find(line.substr(0, line.find_first_of('|')))->second;
+    op2 = std::stod(line.substr(line.find_first_of('|') + 1, line.size()));
+    if (op1 < op2)
         run(cmd);
 }
 void add(std::string line)
