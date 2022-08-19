@@ -1,15 +1,14 @@
-v op =
-n num 0
-n num2 0
-< "what op?
-> op
-< "what num?
-> num
-< "what num2?
+v op
+v num1
+v num2
+< "What num1?
+> num1
+< "What num2?
 > num2
-= op|+ + num|num2
-= op|- - num|num2
-= op|* * num|num2
-= op|/ / num|num2
-< "Your number is 
-e 4 < num
+< "What op?
+> op
+= op|+ + num1|num2
+= op|- - num1|num2
+= op|* * num1|num2
+= op|/ / num1|num2
+< num1

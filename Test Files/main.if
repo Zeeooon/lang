@@ -1,0 +1,5 @@
+# f|func.if
+< "What is your name?
+v n
+> n
+r f n
