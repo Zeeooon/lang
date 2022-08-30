@@ -7,6 +7,7 @@
 std::unordered_map<std::string, std::string> vars;
 std::unordered_map<std::string, std::string> funcmap;
 std::vector<std::string> params;
+std::vector<std::string> tempv;
 int pramloc = 0;
 
 void error(std::string error, int code)
@@ -18,7 +19,6 @@ void error(std::string error, int code)
 void run(std::string line);
 
 void var(std::string line);
-void num(std::string line);
 void inc(std::string line);
 void out(std::string line);
 void in(std::string line);
@@ -32,11 +32,13 @@ void not(std::string line);
 void gre(std::string line);
 void les(std::string line);
 void func(std::string line);
+void set(std::string line);
+void clean();
 
 int main(int argc, char* argv[])
 {
-    //if (argv[1] == NULL)
-    //    error("No File inputted", 1);
+    if (argv[1] == NULL)
+        error("No File inputted", 1);
     std::string line;
     std::string file = argv[1];
     std::ifstream myfile(file);  
@@ -54,7 +56,9 @@ int main(int argc, char* argv[])
 
 void run(std::string line)
 {
-    if (line[0] == 'v')
+    if (line.length() == 0)
+        1 + 1;
+    else if (line[0] == 'v')
         var(line.erase(0, 2));
     else if (line[0] == '#')
         inc(line.erase(0, 2));
@@ -82,6 +86,10 @@ void run(std::string line)
         loop(line.erase(0, 2));
     else if (line[0] == 'r')
         func(line.erase(0, 2));
+    else if (line[0] == '\\')
+        clean();
+    else if (line[0] == '_')
+        set(line.erase(0, 2));
     else
        error("command not found " + line, 3);
 }
@@ -96,6 +104,7 @@ void var(std::string line)
     {
         vars[name] = params[pramloc];
         pramloc++;
+        tempv.push_back(name);
     }
     else
     {
@@ -168,7 +177,10 @@ void add(std::string line)
     std::string line2 = line.substr(line.find_first_of('|')+1, line.size());
     line.erase(line.find_first_of('|'), line.size());
     num1 = std::stod(vars.find(line)->second);
-    num2 = std::stod(vars.find(line2)->second);
+    if (vars.find(line2) == vars.end())
+        num2 = std::stod(line2);
+    else
+        num2 = std::stod(vars.find(line2)->second);
     vars[line] = std::to_string(num1 + num2);
 }
 void sub(std::string line)
@@ -177,7 +189,10 @@ void sub(std::string line)
     std::string line2 = line.substr(line.find_first_of('|')+1, line.size());
     line.erase(line.find_first_of('|'), line.size());
     num1 = std::stod(vars.find(line)->second);
-    num2 = std::stod(vars.find(line2)->second);
+    if (vars.find(line2) == vars.end())
+        num2 = std::stod(line2);
+    else
+        num2 = std::stod(vars.find(line2)->second);
     num1 = num1 - num2;
     vars[line] = std::to_string(num1);
 }
@@ -187,7 +202,10 @@ void mul(std::string line)
     std::string line2 = line.substr(line.find_first_of('|')+1, line.size());
     line.erase(line.find_first_of('|'), line.size());
     num1 = std::stod(vars.find(line)->second);
-    num2 = std::stod(vars.find(line2)->second);
+    if (vars.find(line2) == vars.end())
+        num2 = std::stod(line2);
+    else
+        num2 = std::stod(vars.find(line2)->second);
     num1 = num1 * num2;
     vars[line] = std::to_string(num1);
 }
@@ -197,7 +215,10 @@ void div(std::string line)
     std::string line2 = line.substr(line.find_first_of('|')+1, line.size());
     line.erase(line.find_first_of('|'), line.size());
     num1 = std::stod(vars.find(line)->second);
-    num2 = std::stod(vars.find(line2)->second);
+    if (vars.find(line2) == vars.end())
+        num2 = std::stod(line2);
+    else
+        num2 = std::stod(vars.find(line2)->second);
     num1 = (num1 / num2);
     vars[line] = std::to_string(num1);
 }
@@ -207,8 +228,13 @@ void loop(std::string line)
     if (line.substr(0, line.find_first_of(' ')) == "~")
         while (true)
             run(line.substr(line.find_first_of(' ') + 1, line.size()));
-    else {
-        int amount = std::stoi(line.substr(0, line.find_first_of(' ')));
+    else 
+    {
+        int amount = 0;
+        if (vars.find(line.substr(0, line.find_first_of(' '))) == vars.end())
+            amount = std::stoi(line.substr(0, line.find_first_of(' ')));
+        else
+            amount = std::stoi(vars.find(line.substr(0, line.find_first_of(' ')))->second);
         line.erase(0, line.find_first_of(' '));
         for (int i = 0; i < amount; i++)
         {
@@ -243,4 +269,18 @@ void func(std::string line)
     }
     else
         error("Unable to open file" + loc, 2);
+}
+void set(std::string line)
+{
+    vars[line.substr(0, line.find_first_of('|'))] = vars.find(line.substr(line.find_first_of('|') + 1, line.size()))->second;
+}
+
+void clean()
+{
+    for (int i = 0; i < tempv.size(); i++)
+    {
+        std::cout << vars[tempv[i]];
+        vars.erase(tempv[i]);
+    }
+    tempv.clear();
 }
